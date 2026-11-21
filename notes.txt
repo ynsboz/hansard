@@ -1,3 +1,41 @@
 python3 -m venv .venv
 source .venv/bin/activate
 pip install requests
+
+Format json
+:%!jq .
+Minify json
+:%!jq -c .
+
+Commit prefixes
+• feat: — Introduces a new feature or functionality (correlates with MINOR in Semantic Versioning).
+• fix: — Patches a bug in the codebase (correlates with PATCH in Semantic Versioning).
+• chore: — Routine maintenance, configuration updates, or tasks that do not change production behavior.
+• docs: — Documentation or comment updates.
+• style: — Code formatting and whitespace changes that do not affect meaning.
+• refactor: — Code restructuring that neither fixes a bug nor adds a new feature.
+• perf: — Performance or optimization improvements.
+• test: — Adding or updating automated tests.
+• build: — Changes affecting the build system or external dependencies.
+• ci: — Continuous integration scripts and workflow configurations.
+• revert: — Reverts a previous commit.
+• improvement: — Enhancements to existing functionality (used in some specifications alongside feat and fix).
+• ops: — Operational, infrastructure, or deployment configuration changes.
+
+Commit message
+"If applied, this commit will [your subject line]"
+• Correct (Imperative): "If applied, this commit will add spoken_at column to contributions."
+• Incorrect (Past tense): "If applied, this commit will added spoken_at column."
+• Incorrect (Third-person present): "If applied, this commit will adds spoken_at column."
+
+Commit amend
+git stash list
+git stash
+git stash pop
+git rebase -i HEAD~3
+reword
+git rebase --committer-date-is-author-date HEAD~3
+git push --force-with-lease
+git log --format=fuller
+git commit --amend --no-edit
+

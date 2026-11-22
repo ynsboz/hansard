@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
-from pydantic import AfterValidator, BaseModel, Field, NaiveDatetime
-import json, sys
+from pydantic import AfterValidator, BaseModel, Field, NaiveDatetime, validator
+import json, sys, os
 
 x = r"""{"first_name":"Al","last_name":"Capone","age":48,"city":"Chicago"}"""
 # print(x)
@@ -31,22 +31,33 @@ class Debate(BaseModel):
     external_id: str = Field(alias="ExtId")
     title: str = Field(alias="Title")
     location: str = Field(alias="Location")
-    held_date: NaiveDatetime = Field(alias="ContentLastUpdated")
+    held_date: NaiveDatetime = Field(alias="Date")
     updated_at: NaiveDatetime = Field(alias="ContentLastUpdated")
-    # child_debates: str  # e.g. DAF51343-D1FD-423F-90F8-D413B08478FE has child debates
+    # child_debates: list = Field(
+    #     alias="ChildDebates"
+    # )  # e.g. DAF51343-D1FD-423F-90F8-D413B08478FE has child debates
 
 
 class Contribution(BaseModel):
-    id: int = Field(alias="ItemType")
-    member_id: str = Field(alias="MemberId")
-    member_name: str = Field(alias="AttributedTo")
+    id: int = Field(alias="ItemId")
+    member_id: int | None = Field(alias="MemberId")
+    member_name: str | None = Field(alias="AttributedTo")
     contribution: str = Field(alias="Value")
     started_at: NaiveDatetime | None = Field(alias="Timecode")
     external_id: str = Field("ExternalId")
 
 
-r = open("data/debates/debate/DAF51343-D1FD-423F-90F8-D413B08478FE.json")
-j = json.load(r)
-
-d = Debate(**j["Overview"])
-print(d)
+ROOT = os.getcwd()  # hansard/scripts/extract
+child_debates = []
+for external_id in os.listdir(ROOT + "/data/debates/debate/"):
+    debate_json = open(ROOT + "/data/debates/debate/" + external_id)
+    debate_dict = json.load(debate_json)
+    debate = Debate(**debate_dict["Overview"])
+    for contribution_dict in debate_dict["Items"]:
+        if contribution_dict["ItemType"] == "Contribution":
+            contribution = Contribution(**contribution_dict)
+            print(contribution)
+    # contribution = Contribution()
+    # child_debates = debate_dict["ChildDebates"]
+    # for child_debate in debate_dict["ChildDebates"]:
+    #     print(child_debate)

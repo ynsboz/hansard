@@ -33,9 +33,6 @@ class Debate(BaseModel):
     location: str = Field(alias="Location")
     held_date: NaiveDatetime = Field(alias="Date")
     updated_at: NaiveDatetime = Field(alias="ContentLastUpdated")
-    # child_debates: list = Field(
-    #     alias="ChildDebates"
-    # )  # e.g. DAF51343-D1FD-423F-90F8-D413B08478FE has child debates
 
 
 class Contribution(BaseModel):
@@ -47,16 +44,28 @@ class Contribution(BaseModel):
     external_id: str = Field("ExternalId")
 
 
+# ChildDebates e.g. DAF51343-D1FD-423F-90F8-D413B08478FE has child debates
+
 ROOT = os.getcwd()  # hansard/scripts/extract
 child_debates = []
 for external_id in os.listdir(ROOT + "/data/debates/debate/"):
     debate_json = open(ROOT + "/data/debates/debate/" + external_id)
     debate_dict = json.load(debate_json)
+    debate_dict["parent_debate"] = None
     debate = Debate(**debate_dict["Overview"])
     for contribution_dict in debate_dict["Items"]:
         if contribution_dict["ItemType"] == "Contribution":
             contribution = Contribution(**contribution_dict)
             print(contribution)
+    level_1 = debate_dict["ChildDebates"]
+    level_2 = []
+    while child_debates != []:
+        for child in level_1["ChildDebates"]:
+            child["parent_debate"] = debate.id
+            debate = Debate(**child["Overview"])
+            if child["ChildDebates"] != []:
+                level_2 = child["ChildDebates"]
+
     # contribution = Contribution()
     # child_debates = debate_dict["ChildDebates"]
     # for child_debate in debate_dict["ChildDebates"]:
